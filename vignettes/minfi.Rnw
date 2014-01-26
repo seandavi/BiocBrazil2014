@@ -1,7 +1,8 @@
-%\VignetteIndexEntry{Minfi Guide}
+%\VignetteIndexEntry{Methylation Vignette}
 %\VignetteDepends{minfi}
 %\VignetteDepends{minfiData}
-%\VignettePackage{minfi}
+%\VignettePackage{BiocBrazil2014}
+%\VignetteEngine{knitr::knitr}
 \documentclass[12pt]{article}
 \usepackage[left=2cm,top=2cm,bottom=3cm,right=2cm,ignoreheadfoot]{geometry}
 \pagestyle{empty}
@@ -57,7 +58,7 @@
 \usepackage{graphicx}
 
 <<options,echo=FALSE,results='hide'>>=
-opts_chunk$set(fig.show='asis',size='footnotesize',dev=c('pdf','png'),fig.align='center',cache=TRUE)
+opts_chunk$set(fig.show='asis',size='footnotesize',dev=c('pdf','png'),fig.align='center',fig.pos='!htbp',cache=TRUE)
 options(width=70)
 @ 
           
@@ -67,7 +68,7 @@ options(width=70)
 \author{Modified by Sean Davis\\
   \\
   Original by Kasper D.\ Hansen and Martin J. Aryee}
-\date{Modified: January 25, 2014.  Compiled: \today}
+\date{Compiled: \today}
 
 \begin{document}
 \maketitle
@@ -141,7 +142,7 @@ DMPs or DMRs.
 
 \subsubsection{Getting Started}
 
-<<load,results='hide'>>=
+<<load,results='hide',messages=FALSE>>=
 require(minfi)
 require(minfiData)
 @ 
@@ -199,14 +200,15 @@ RGset <- read.450k.exp(base = baseDir, targets = targets)
 Let us look at the associated pheno data, which is really just the information contained in the
 targets object above.
 <<pData>>=
-#RGset
-#pd <- pData(RGset)
-#pd[,1:4]
+show(RGset)
+pd <- pData(RGset)
+pd
 @ 
 
 The \Rcode{read.450k.exp} also makes it possible to read in an entire directory or directory tree
 (with \Rcode{recursive} set to \Rcode{TRUE}) by using the function just with the argument \Rcode{base}
 and \Rcode{targets=NULL}, like
+
 <<read2>>=
 RGset2 = read.450k.exp(file.path(baseDir, "5723646052"))
 RGset3 = read.450k.exp(baseDir, recursive = TRUE)
@@ -230,6 +232,7 @@ targets2 <- read.csv(file.path(baseDir, "SampleSheet.csv"),
 targets2
 @ 
 We now need to populate a \Rcode{Basename} column.  On possible approach is the following
+
 <<Basename>>=
 targets2$Basename <- file.path(baseDir, targets2$Sentrix_ID, 
                                paste0(targets2$Sentrix_ID, 

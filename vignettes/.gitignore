@@ -1,0 +1,10 @@
+cache
+figure
+*#
+*tex
+.#*
+*aux
+*log
+*out
+minfi.pdf
+qcReport.pdf
