@@ -8,3 +8,6 @@ figure
 *out
 minfi.pdf
 qcReport.pdf
+results.csv
+*.pdf
+*.toc
