@@ -1,5 +1,11 @@
+%\VignetteIndexEntry{DESeq2 Tutorial}
+%\VignetteDepends{DESeq2}
+%\VignetteDepends{parathyroidSE}
+%\VignettePackage{BiocBrazil2014}
+%\VignetteEngine{knitr::knitr}
+
 % To compile this document
-% library('cacheSweave'); rm(list=ls()); Sweave('DESeq2_parathyroid.Rnw',driver=cacheSweaveDriver()); system('pdflatex DESeq2_parathyroid'); relocateAnswers(); for(i in 1:2) system('pdflatex DESeq2_parathyroid')
+% library(knitr); knit('DESeq2_parathyroid.Rnw',driver=cacheSweaveDriver()); system('pdflatex DESeq2_parathyroid'); relocateAnswers(); for(i in 1:2) system('pdflatex DESeq2_parathyroid')
 
 \documentclass[12pt]{article}
 \usepackage[left=2cm,top=2cm,bottom=3cm,right=2cm,ignoreheadfoot]{geometry}
@@ -25,7 +31,7 @@
 \newcommand{\thetitle}{Differential analysis of RNA-Seq data at the gene level using the DESeq2 package}
 
 \usepackage[pdftitle={\thetitle},%
-  pdfauthor={Michael Love, Simon Anders, Wolfgang Huber},%
+  pdfauthor={Michael Love, Simon Anders, Wolfgang Huber, Sean Davis},%
   bookmarks,%
   colorlinks,%
   linktoc=section,%
@@ -89,7 +95,10 @@ opts_chunk$set(fig.lp='',size='footnotesize',dev=c('pdf','png'),fig.align='cente
 %\addtostream{qna}{\unexpanded{\paragraph{Answer to Question \arabic{QuestionsAndAnswersCounter}: #2}}}}
 
 % ------------------------------------------------------------
-\author{Michael Love, Simon Anders, Wolfgang Huber}
+\author{Michael Love, Simon Anders, Wolfgang Huber \\
+  \\
+  Minor Modifications by Sean Davis
+}
 \title{\textsf{\textbf{\thetitle}}}
 %------------------------------------------------------------
 
@@ -945,8 +954,8 @@ ucscTable <- getTable(ucscTableQuery(mySession, track=trackName,
 Here we use a locally cached copy of \Robject{ucscTable}:
 
 <<localERBS>>=
-ucscTableFile <- "localUcscTable.csv"
-ucscTable <- read.csv(ucscTableFile, stringsAsFactors=FALSE)
+ucscTableFile <- system.file('extdata/localUcscTable.csv.gz',package='BiocBrazil2014')
+ucscTable <- read.csv(gzfile(ucscTableFile), stringsAsFactors=FALSE)
 @
 
 We now can use the downloaded table of annotated estrogen receptor peaks.
