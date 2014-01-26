@@ -1,4 +1,7 @@
 %\VignetteIndexEntry{Bioconductor Exome Exercises}
+%\VignettePackage{BiocBrazil2014}
+%\VignetteEngine{knitr::knitr}
+
 \documentclass[12pt]{article}
 \usepackage[left=2cm,top=2cm,bottom=3cm,right=2cm,ignoreheadfoot]{geometry}
 \pagestyle{empty}
@@ -56,6 +59,7 @@
 \usepackage{graphicx}
 
 <<options,echo=FALSE,results='hide'>>=
+library(knitr)
 opts_chunk$set(fig.show='asis',size='footnotesize',error=FALSE,fig.align='center',fig.pos='!htbp',cache=TRUE)
 options(width=70)
 @ 
