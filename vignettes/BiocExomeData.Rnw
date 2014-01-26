@@ -56,7 +56,7 @@
 \usepackage{graphicx}
 
 <<options,echo=FALSE,results='hide'>>=
-opts_chunk$set(fig.show='asis',size='footnotesize',dev=c('pdf','png'),fig.align='center',cache=TRUE)
+opts_chunk$set(fig.show='asis',size='footnotesize',error=FALSE,fig.align='center',fig.pos='!htbp',cache=TRUE)
 options(width=70)
 @ 
           
@@ -280,7 +280,7 @@ To evaluate capture, we need the actual reads from a sequencing experiment.  Thi
 # library(ShortRead)
 # alignedGR = readGappedReads('NA19909.chr22.bam')
 # load the .Rda file instead of reading the bam, just for efficiency
-load('N19909.chr22.alignedreads.Rda')
+data('N19909.chr22.alignedreads')
 alignedGR
 @ 
 
@@ -367,7 +367,7 @@ plotTracks(list(itrack,gtrack,atrack,dtrack),from=20.1e6,to=20.11e6)
 
 There is a well-known phenomenon in capture sequencing (indeed, with the Illumina sequencing platform itself) whereby GC content of the region being sequenced affects the coverage in that region.  Using the Biostrings, BSgenome, and BSgenome data packages, it is just a few lines of code to examine how GC content and capture coverage are related.
 
-<<coverage30,fig=TRUE>>=
+<<coverage30>>=
 library(BSgenome.Hsapiens.UCSC.hg19)
 chr22 = Hsapiens$chr22
 # Make views on the chromosome 22 sequence that correspond to
@@ -382,7 +382,7 @@ hist(gcPercent)
 
 \Rclass{Views} on a bioconductor data object like the chromosome 22 sequence allow us to perform independent operations (like \Rfunction{letterFrequency}) on specific regions of the object.  In this case, our regions are defined by our capture regions.  We can also use \Rclass{Views} on our coverage data to get the average coverage in each capture region.
 
-<<coverage40,fig=TRUE>>=
+<<coverage40>>=
 library(ggplot2)
 cvgViews = Views(cvg$'22',ranges(chr22CR))
 cvgMeans = viewMeans(cvgViews)
@@ -446,8 +446,8 @@ We start by using the VariantAnnotation package to load the VCF file into a VCF 
 
 <<vcf10>>=
 library(VariantAnnotation)
-vcf = readVcf(system.file('extdata/1000G/1kg.chr22.vcf',
-  package='BasicExomeExample'),genome='hg19')
+vcf = readVcf(system.file('extdata/1kg.chr22.vcf.gz',
+  package='BiocBrazil2014'),genome='hg19')
 @
 
 \subsubsection{Using Known Sites As a Quality Metric}
@@ -508,16 +508,9 @@ df1 = data.frame(QD=QD,knownNovel=knownNovel,
 
 Now, to examine some relationships between the known and novel sites and some VCF file metrics.  Variant quality should be important.
 
-<<vcf45,fig=TRUE,fig.cap='Density plot stratified by "known" and "novel" variants.  The "known" variants are more likely to be true positive results.  Note that below a quality of about 20, we are more likely to get a "novel" result, meaning that a quality of 20 should be a minimum threshold.'>>=
+<<vcf45,fig.cap='Density plot stratified by "known" and "novel" variants.  The "known" variants are more likely to be true positive results.  Note that below a quality of about 20, we are more likely to get a "novel" result, meaning that a quality of 20 should be a minimum threshold.'>>=
 library(ggplot2)
 ggplot(df1,aes(QUAL,fill=knownNovel))+
-    geom_density(alpha=0.4)+scale_x_continuous(limits=c(0,60))
-@
-
-And check out read depth at the locus.
-
-<<vcf47,echo=FALSE>>=
-ggplot(df1,aes(DP,fill=knownNovel))+
     geom_density(alpha=0.4)+scale_x_continuous(limits=c(0,60))
 @
 
@@ -554,16 +547,22 @@ A number of other plots might be of interest.  Feel free to try things out to se
 
 \subsubsection{Using Transition/Transversion Ratio To Estimate False Positive Rate}
 
-DNA mutation at a single nucleotide can be classified as either a /transition/ or a /transversion/.  As can be seen from the figure, transversions are twice as likely as transitions /a priori/.  Hence, the naive ratio of transitions (ti) to transversions (tv) is 0.5.  Figures are from \href{http://www.mun.ca/biology/scarr/Transitions_vs_Transversions.html}{this site}.
+DNA mutation at a single nucleotide can be classified as either a transition or a transversion.  As can be seen from the Figure \ref{fig:transversion}, transversions are twice as likely as transitions /a priori/.  Hence, the naive ratio of transitions (ti) to transversions (tv) is 0.5.  Figures are from \href{http://www.mun.ca/biology/scarr/Transitions_vs_Transversions.html}{this site}.
 
 \begin{figure}
+\centering
 \includegraphics[width=0.5\textwidth]{TransitionTransversion}
+\caption{DNA substitution mutations are of two types. Transitions are interchanges of two-ring purines (A--G) or of one-ring pyrimidines (C--T): they therefore involve bases of similar shape. Transversions are interchanges of purine for pyrimidine bases, which therefore involve exchange of one-ring and two-ring structures. Note that transversions (tv) are twice as likely as transitions(ti), leading to an expected ratio of ti/tv of 0.5.}
+\label{fig:transversion}
 \end{figure}
 
-However, a number of biological processes alter this naive ti/tv ratio so that it is above 2 for natural variation across the human genome and 3.3 for the coding regions of the genome.  A partial explanation is given by the next figure which describes the process of "wobble".  A tautomeric shift (change from an amino group to an imino group) leads to a mispairing in replication and results in a transition mutation in the DNA.  This process occurs naturally for each base and results in SNVs being introduced, all of which are transitions.
+However, a number of biological processes alter this naive ti/tv ratio so that it is above 2 for natural variation across the human genome and 3.3 for the coding regions of the genome.  A partial explanation is given by the next figure which describes the process of "wobble".  A tautomeric shift (change from an amino group to an imino group) leads to a mispairing in replication and results in a transition mutation in the DNA.  This process occurs naturally for each base and results in SNVs being introduced, all of which are transitions (see Figure \ref{fig:spontaneousmutation}).
 
 \begin{figure}
+\centering
 \includegraphics[width=0.5\textwidth]{Transition_mutation}
+\caption{In the original double-stranded DNA molecule, A in the standard (amino) form pairs with T. During replication, the two strands separate. In the upper diagram, T pairs with A as usual, which replicates the wild-type sequence. In the lower diagram, A has undergone a tautomeric shift to the non-standard (imino) form A', \textit{which pairs with C}. In the next round of replication, the imino A' shifts back to the amino A form, which pairs with T, which again reproduces the wild-type sequence. Replication of the other strand pairs C with G. By comparison with the original molecule, the result is a T--C mutation. A tautomeric shift in one strand has produced a transition mutation in the complementary strand.  This process leads to a ti/tv ratio that is typically much larger than the expected 0.5.}
+\label{fig:spontaneousmutation}
 \end{figure}
 
 
@@ -687,7 +686,7 @@ Consider how you would use other sources of genomic annotation to further improv
 The NCI60 data are analogous to the 1000 genomes dataset, but the variants in this dataset may be disease-associated.  In fact, the remnants of the original disease etiology are still present in the data.  
 
 <<vcf80>>=
-vcf = readVcf(system.file('extdata/NCI60/NCI60.chr22.vcf',package='BasicExomeExample'),genome='hg19')
+melVcf = readVcf(system.file('extdata/SK-MEL-5.vcf.gz',package='BiocBrazil2014'),genome='hg19')
 @
 
 \subsubsection{Exercises}
@@ -705,36 +704,40 @@ load2IGV and load2newIGV provide convenient functionality for R to interact with
 IGV offers a remort control port that allows R to communicate with IGV. The current
 command set is fairly limited, but it does allow for some IGV operations to be performed in
 the R console. To utilize this functionality, be sure that IGV is set to allow communication via
-the "enable port" in the advanced preferences in IGV. 
+the "enable port" in the advanced preferences in IGV (it is by default).
 
 <<sradb10,eval=FALSE>>=
 if(!require(SRAdb)) {
   library(BiocInstaller)
   biocLite('SRAdb')
+  library(SRAdb)
   }
 # start IGV on your computer 
 startIGV('mm') # 1.2GB memory used
+# if the command above does not work, start IGV by hand before continuing
 
 #connect to IGV socket}
 sock = IGVsocket()
 
-#Change IGV genome to match our BAM files
-IGVgenome(sock,'b37')
+#Load a BAM from the web into IGV
+IGVload(sock,'http://watson.nci.nih.gov/projects/nci60/wes/BAMS/SK-MEL-5_reord_mdups_ralgn_fmate_recal.bam')
 
-#Load our example BAM files into IGV 
-exampleBams = file.path(system.file('extdata/1000G/bam/',package='BasicExomeExample'),dir(system.file('extdata/1000G/bam/',package='BasicExomeExample'),pattern='.bam$'))
-IGVload(sock,exampleBams)
+# And load the VCF file for the same sample
+IGVload(sock,'http://watson.nci.nih.gov/projects/nci60/wes/vcf/SK-MEL-5.vcf')
+
 gotoVCFRecord <- function(vcfObject,sock,idx=1) {
   # takes a VCF object, an IGV socket, and the index 
   # of the variant of interest
   rd = rd = rowData(vcf)
   IGVgoto(sock,sprintf("%s:%d-%d",seqnames(rd)[idx],start(rd)[idx],end(rd)[idx]))
   }
-vcf = readVcf(system.file('extdata/1000G/1kg.chr22.vcf',package='BasicExomeExample'),genome='hg19')
-indelSites = which(values(info(vcf))[['INDEL']])
-gotoVCFRecord(vcf,sock,indelSites[2])
-#and take a pretty picture
+vcf = readVcf(system.file('extdata/SK-MEL-5.vcf.gz',package='BiocBrazil2014'),genome='hg19')
+indelSites = which(info(vcf)$INDEL)
+# go to the first indel site
+gotoVCFRecord(vcf,sock,indelSites[1])
+#and take a pretty picture--see your working directory
 IGVsnapshot(sock)
+
 @
 
 <<relocateAnswers, echo=FALSE>>=
