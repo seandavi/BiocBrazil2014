@@ -284,6 +284,7 @@ To evaluate capture, we need the actual reads from a sequencing experiment.  Thi
 # library(ShortRead)
 # alignedGR = readGappedReads('NA19909.chr22.bam')
 # load the .Rda file instead of reading the bam, just for efficiency
+library(BiocBrazil2014)
 data('N19909.chr22.alignedreads')
 alignedGR
 @ 
