@@ -6,7 +6,7 @@ Date: 2014-01-26
 Author: Sean Davis
 Maintainer: Sean Davis <sdavis2@mail.nih.gov>
 Description: Vignettes for DESeq2, methylation, public data from GEO, ExpressionSets, and Exome Sequencing
-Depends: minfi, minfiData, DESeq2, parathyroidSE
+Depends: minfi, minfiData, DESeq2, parathyroidSE, SNPlocs.Hsapiens.dbSNP.20120608
 Suggests: knitr
 License: MIT
 VignetteBuilder: knitr
