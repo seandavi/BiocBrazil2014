@@ -156,7 +156,7 @@ For each of the two capture experiments, I have supplied the capture regions as 
 <<capture10>>=
 library(rtracklayer)
 ag38mss = import(system.file('extdata/capture/Agilent_SureSelect_Human_All_Exon_38Mb_Kit_hg19.bed',
-  package='BasicExomeExample'))
+  package='BasicExomeExample'),format='bed')
 class(ag38mss)
 @
 
