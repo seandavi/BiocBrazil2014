@@ -771,8 +771,8 @@ relocateAnswers = function(con="BiocExomeData.tex"){
 sessionInfo()
 @
 
-\bibliographystyle{plain}
+%\bibliographystyle{plain}
 
-\bibliography{BiocExomeData}
+%\bibliography{BiocExomeData}
 
 \end{document}
