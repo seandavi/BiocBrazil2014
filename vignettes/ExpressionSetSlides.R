@@ -138,11 +138,11 @@ hist(stdDev)
 eset2 = eset[order(stdDev,decreasing=TRUE)[1:20],]
 
 
-## ----heatmap60,results='hide'--------------------------------------------
+## ----heatmap60,results='hide',fig.show='hide'----------------------------
 heatmap.2(exprs(eset2),trace='none')
 
 
-## ----heatmap70,results='hide',echo=FALSE---------------------------------
+## ----heatmap70,results='hide',echo=FALSE,fig.show='hide'-----------------
 heatmap.2(exprs(eset2),trace='none',labRow=fData(eset)$'Gene Symbol',
   labCol=pData(eset)$source_name_ch1)
 
