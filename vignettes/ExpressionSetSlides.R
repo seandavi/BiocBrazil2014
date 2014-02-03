@@ -73,7 +73,7 @@ featureNames(eset)[1:8]
 ## ----phenoData22,echo=TRUE,results='hide'--------------------------------
 head(pData(eset))
 class(pData(eset))
-colnames(fData(eset))
+colnames(pData(eset))
 all.equal(sampleNames(eset),rownames(pData(eset)))
 summary(pData(eset))
 
@@ -109,17 +109,41 @@ levels(pData(eset)$source_name_ch1)
 eset[,pData(eset)$source_name_ch1=="Bone marrow sample"]
 
 
-## ----heatmap10-----------------------------------------------------------
+## ----heatmapprelim,results='hide'----------------------------------------
+library(gplots)
+?heatmap.2
+
+
+## ----heatmap10,results='hide'--------------------------------------------
+summary(exprs(eset))
 hist(exprs(eset))
 
 
-## ----heatmap20-----------------------------------------------------------
+## ----heatmap20,results='hide'--------------------------------------------
+summary(log2(exprs(eset)))
 hist(log2(exprs(eset)))
 
 
 ## ----heatmap30,results='hide'--------------------------------------------
 exprs(eset) = log2(exprs(eset))
 hist(exprs(eset))
+
+
+## ----heatmap40,results='hide'--------------------------------------------
 stdDev = apply(exprs(eset),1,sd)
+hist(stdDev)
+
+
+## ----heatmap50,results='hide'--------------------------------------------
+eset2 = eset[order(stdDev,decreasing=TRUE)[1:20],]
+
+
+## ----heatmap60,results='hide'--------------------------------------------
+heatmap.2(exprs(eset2),trace='none')
+
+
+## ----heatmap70,results='hide',echo=FALSE---------------------------------
+heatmap.2(exprs(eset2),trace='none',labRow=fData(eset)$'Gene Symbol',
+  labCol=pData(eset)$source_name_ch1)
 
 
