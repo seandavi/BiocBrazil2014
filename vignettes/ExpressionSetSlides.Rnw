@@ -266,4 +266,13 @@ heatmap.2(exprs(eset2),trace='none',labRow=fData(eset)$'Gene Symbol',
 @ 
 \end{frame}
 
+\begin{frame}{Challenge Exercises}
+\begin{itemize}
+  \item Use the pheatmap package to make a more interesting and informative heatmap that includes the sample types as a color bar.
+  \item Make a multidimensional scaling (MDS) plot of the samples using the top 200 most variable genes.
+  \item Use the featureData in the ExpressionSet and the grep function to construct a new ExpressionSet subset that contains transcription factor genes.
+  \item Make a histogram of the Pearson correlation of the correlation between the first gene and all the other genes.
+\end{itemize}
+\end{frame}
+
 \end{document}
