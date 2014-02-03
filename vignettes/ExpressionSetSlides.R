@@ -143,7 +143,7 @@ heatmap.2(exprs(eset2),trace='none')
 
 
 ## ----heatmap70,results='hide',echo=FALSE,fig.show='hide'-----------------
-heatmap.2(exprs(eset2),trace='none',labRow=fData(eset)$'Gene Symbol',
-  labCol=pData(eset)$source_name_ch1)
+heatmap.2(exprs(eset2),trace='none',labRow=fData(eset2)$'Gene Symbol',
+  labCol=pData(eset2)$source_name_ch1)
 
 
