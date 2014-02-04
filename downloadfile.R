@@ -4,4 +4,4 @@ download.file('http://seandavi.github.io/BiocBrazil2014/data/1kg.chr22.vcf.gz.tb
 download.file('http://seandavi.github.io/BiocBrazil2014/data/A549_ATCC.vcf.gz',destfile='A549_ATCC.vcf.gz')
 download.file('http://seandavi.github.io/BiocBrazil2014/data/A549_ATCC.vcf.gz.tbi',destfile='A549_ATCC.vcf.gz.tbi')
 download.file('http://seandavi.github.io/BiocBrazil2014/vignettes/VariantsExercises.R',destfile='VariantsExercises.R')
-download.file('http://seandavi.github.io/BiocBrazil2014/vignettes/VariantsExerciese.pdf',destfile='VariantsExerciese.pdf')
+download.file('http://seandavi.github.io/BiocBrazil2014/vignettes/VariantsExercises.pdf',destfile='VariantsExerciese.pdf')
