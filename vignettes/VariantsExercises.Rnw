@@ -1,0 +1,189 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+\author{Sean Davis}
+\title{Variant Annotation \\
+and Other Exercises}
+
+\section{Background}
+
+<<setup,results='hide',echo=FALSE>>=
+library(knitr)
+opts_chunk$set(cache=TRUE,out.width='0.5\\textwidth',fig.align='center',warnings=FALSE,messages=FALSE)
+@ 
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}[fragile]{A Example Variant}
+\begin{figure}
+\begin{center}
+\includegraphics[width=1\textwidth]{figure/BRAFV600E-SK-MEL-5}
+\caption{A true variant in a cancer sample as viewed in the Integrated Genomic Viewer (IGV) software}
+\end{center}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Tasks}
+\begin{itemize}
+  \item Read in a VCF file and locate all variants with respect to genes
+  \item Predict the coding effect of the variants in a VCF file
+  \item Investigate mutation spectrum in two cancer samples that have undergone exome sequencing
+\end{itemize}
+\end{frame}
+
+\section{Locate Variants with Respect to Genes}
+
+\begin{frame}[fragile]{Possible locations for variants}
+\begin{table}[h!]
+\begin{center}
+\begin{tabular}{l|l}
+\hline
+Location & Details \\
+\hline
+coding &  falls \emph{within} a coding region \\
+fiveUTR &  falls \emph{within} a 5' untranslated region \\
+threeUTR &  falls \emph{within} a 3' untranslated region \\
+intron &  falls \emph{within} an intron region \\
+intergenic & does not fall \emph{within} a transcript associated with a gene \\
+spliceSite & overlaps any portion of the first 2 or last 2 
+nucleotides of an intron \\ 
+promoter & falls \emph{within} a promoter region of a transcript \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Variant locations}
+\label{table:location}
+\end{table}
+\end{frame}
+
+\begin{frame}[fragile]{Necessary Pieces of Information to Locate Variants}
+\begin{itemize}
+  \item Gene models and transcripts
+  \item Variants for annotation
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Actually Locating Variants}
+\scriptsize
+<<locateVariants,results="hide">>=
+library(VariantAnnotation)
+fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
+vcf <- readVcf(fl, genome="hg19")
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+codingvar <- locateVariants(vcf, txdb, CodingVariants())
+seqlevels(vcf)=paste0('chr',seqlevels(vcf))
+codingvar <- locateVariants(vcf, txdb, CodingVariants())
+head(codingvar, 3)
+allvar <- locateVariants(rd, txdb, AllVariants())
+head(allvar)
+@ 
+\end{frame}
+
+\section{Amino acid coding changes}
+
+\begin{frame}[fragile]{Predicting Coding Effects of Variants}
+\begin{itemize}
+  \item Gene models and transcripts
+  \item Variants for annotation
+  \item \textit{Sequence information}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Actually Predicting Variants}
+
+<<predictCoding,results="hide">>=
+library(BSgenome.Hsapiens.UCSC.hg19)
+coding <- predictCoding(vcf, txdb, seqSource=Hsapiens)
+coding[5:7]
+@
+
+When the resulting \textit{varCodon} is not a multiple of 3 it cannot be 
+translated. The consequence is considered a \textit{frameshift} and 
+\textit{varAA} will be missing. 
+
+<<predictCoding_frameshift,results="hide">>=
+## CONSEQUENCE is 'frameshift' where translation is not possible
+coding[mcols(coding)$CONSEQUENCE == "frameshift"]
+@
+\end{frame}
+
+\begin{frame}[fragile]{Visualizing Variants in Genomic Context Using Gviz}
+\small
+<<gviz10,fig.show=FALSE,results='hide'>>=
+library(Gviz)
+geneTrack = GeneRegionTrack(txdb,chromosome='chr22',start=50e6,end=51e6)
+variantTrack = AnnotationTrack(rowData(vcf))
+plotTracks(list(geneTrack,newTrack),from=50.5e6,to=50.6e6)
+@ 
+\end{frame}
+
+\section{Investigating Some Cancer Samples}
+
+\begin{frame}{Transitions and Transversions}
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{TransitionTransversion}
+\label{fig:transversion1}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Transitions and Transversions}
+\begin{figure}
+\centering
+\includegraphics[width=0.3\textwidth]{TransitionTransversion}
+\caption{DNA substitution mutations are of two types. Transitions are interchanges of two-ring purines (A--G) or of one-ring pyrimidines (C--T): they therefore involve bases of similar shape. Transversions are interchanges of purine for pyrimidine bases, which therefore involve exchange of one-ring and two-ring structures. Note that transversions (tv) are twice as likely as transitions(ti), leading to an expected ratio of ti/tv of 0.5.}
+\label{fig:transversion2}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Spontaneous Mutation Alters ti/tv Ratio}
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{Transition_mutation}
+\label{fig:spontaneousmutation1}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Spontaneous Mutation Alters ti/tv Ratio}
+\begin{figure}
+\centering
+\includegraphics[width=0.3\textwidth]{Transition_mutation}
+\caption{In the original double-stranded DNA molecule, A in the standard (amino) form pairs with T. During replication, the two strands separate. In the upper diagram, T pairs with A as usual, which replicates the wild-type sequence. In the lower diagram, A has undergone a tautomeric shift to the non-standard (imino) form A', \textit{which pairs with C}. In the next round of replication, the imino A' shifts back to the amino A form, which pairs with T, which again reproduces the wild-type sequence. Replication of the other strand pairs C with G. By comparison with the original molecule, the result is a T--C mutation. A tautomeric shift in one strand has produced a transition mutation in the complementary strand.  This process leads to a ti/tv ratio that is typically much larger than the expected 0.5.}
+\label{fig:spontaneousmutation2}
+\end{figure}
+\end{frame}
+
+\begin{frame}{ti/tv ratio and false positive variants}
+\begin{itemize}
+\item If all observed variants are true positives, then we should observe approximately the ti/tv for the exome, which is reliably estimated at 3.3.
+\item If all observed variants are false positives, then we should observe the naive expected ti/tv, or 0.5.
+\item In reality, the observed ti/tv ratio is a mixture of true and false positives.  
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ti/tv ratio and false positive variants}
+Given the observed ti/tv ($titv_{obs}$), the false positive ti/tv ($titv_{fp}$), the true positive ti/tv ($titv_{tp}$), and $\alpha$, the proportion of SNVs that are true positives, we can write:
+
+\begin{equation}
+\alpha ( titv_{tp} ) + ( 1 - \alpha ) ( titv_{fp} ) = titv_{obs}
+\end{equation}
+
+Solving for 1 - $\alpha$ gives an estimate of the false positive rate.
+
+\begin{equation} \label{eq:fpr}
+FPR = 1 - \alpha = 1 - (titv_{obs} - titv_{fp})/(titv_{tp} - titv_{fp})
+\end{equation}
+\end{frame}
+
+
+<<readvcf>>=
+vcf1 = readVcf('../data//SK-MEL-5.vcf.gz',genome='hg19')
+vcf2 = readVcf('../data/A549_ATCC.vcf.gz',genome='hg19')
+@ 
+
+
+\end{document}
