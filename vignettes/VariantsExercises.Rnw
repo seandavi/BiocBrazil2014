@@ -112,16 +112,19 @@ coding[mcols(coding)$CONSEQUENCE == "frameshift"]
 \end{frame}
 
 \begin{frame}[fragile]{Visualizing Variants in Genomic Context Using Gviz}
-\small
-<<gviz10,fig.show=FALSE,results='hide'>>=
+\tiny
+<<gviz10,fig.show=TRUE,results='hide',fig.align='center',error=FALSE,warning=FALSE>>=
 library(Gviz)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
 geneTrack = GeneRegionTrack(txdb,chromosome='chr22',start=50e6,end=51e6)
 variantTrack = AnnotationTrack(rowData(vcf))
-plotTracks(list(geneTrack,newTrack),from=50.5e6,to=50.6e6)
+plotTracks(list(geneTrack,variantTrack),from=50.5e6,to=50.6e6)
 @ 
 \end{frame}
 
 \section{Investigating Some Cancer Samples}
+
+ 
 
 \begin{frame}{Transitions and Transversions}
 \begin{figure}
@@ -179,11 +182,107 @@ FPR = 1 - \alpha = 1 - (titv_{obs} - titv_{fp})/(titv_{tp} - titv_{fp})
 \end{equation}
 \end{frame}
 
+\begin{frame}[fragile]{What do we need to find ti/tv}
+\begin{centering}
+\begin{verbatim}
+   alt
+ref    A    C    G    T
+  A    0  520 3195  328
+  C  592    0  770 3598
+  G 3782  756    0  568
+  T  359 3349  542    0
+\end{verbatim}
+\end{centering}
+\end{frame}
 
-<<readvcf>>=
-vcf1 = readVcf('../data//SK-MEL-5.vcf.gz',genome='hg19')
-vcf2 = readVcf('../data/A549_ATCC.vcf.gz',genome='hg19')
+\begin{frame}{Investigating Cancer Sample Tasks}
+\begin{itemize}
+  \item Load two VCF files representing a cancer sample
+  \item Define a function to produce a data frame of SNPs with two columns:
+  \begin{itemize}
+    \item Reference allele
+    \item Alternate allele (the variant)
+  \end{itemize}
+  \item Define a function to calculate the ti/tv ratio for a vcf file
+  \item Subset our two VCF files to include only the ``Type 2'' variants
+  \item Calculate the ti/tv ratio for each sample
+  \item Make a plot of the mutation spectrum for each sample type
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Examining our VCF file}
+\scriptsize
+<<readvcf,results='hide'>>=
+# you may need to change the file name to load in the data
+vcfMel = readVcf('../data/SK-MEL-5.vcf.gz',genome='hg19')
+vcfLung = readVcf('../data/A549_ATCC.vcf.gz',genome='hg19')
+nrow(vcfMel)
+nrow(vcfLung)
+vcfMel
+vcfLung
+rowData(vcfMel)
+info(vcfMel)
+rowData(vcfMel)
+header(vcfMel)
+ref(vcfMel)
+alt(vcfMel)
+@ 
+\end{frame}
+
+\begin{frame}[fragile]{Our functions}
+\pause
+\scriptsize
+<<functiondefs,results='hide'>>=
+vcf2snpDF = function(vcf) {
+    refall = as.character(ref(vcf))
+    altall = as.character(unlist(alt(vcf))[start(PartitioningByEnd(alt(vcf)))])
+    tmpDF = data.frame(ref=refall,alt=altall,stringsAsFactors=FALSE)
+    # snps only
+    tmpDF = tmpDF[nchar(tmpDF$ref)==1 & nchar(tmpDF$alt)==1,]
+    return(tmpDF)
+}
+@
+
+\pause
+<<titvfunction,results='hide'>>=
+titv = function(vcf) {
+    variantDF = vcf2snpDF(vcf)
+    tbl = table(variantDF)
+    ti = tbl['C','T']+tbl['T','C']+tbl['A','G']+tbl['G','A']
+    tv = tbl['A','C']+tbl['C','A']+tbl['A','T']+tbl['T','A']+tbl['C','G']+tbl['G','C']+tbl['G','T']+tbl['T','G']
+    return(list(ti=ti,tv=tv,tbl=tbl,titv=ti/tv))
+}
+@
+\end{frame}
+
+\begin{frame}[fragile]{Subset to include only ``Type 2'' variants}
+\scriptsize
+<<subsetvcfs>>=
+vcfMelT2 = vcfMel[grep('Type2',rowData(vcfMel)$FILTER)]
+vcfLungT2 = vcfLung[grep('Type2',rowData(vcfLung)$FILTER)]
 @ 
 
+<<titvcald,results='hide'>>=
+titv(vcfMelT2)
+titv(vcfLungT2)
+@ 
+\end{frame}
+
+
+
+\begin{frame}[fragile]{And a plot of the mutation spectrum}
+\scriptsize
+<<ggplot>>=
+library(ggplot2)
+ggplot(vcf2snpDF(vcfMelT2),aes(x=ref,fill=alt))+geom_bar()
+ggplot(vcf2snpDF(vcfLungT2),aes(x=ref,fill=alt))+geom_bar()
+@ 
+\end{frame}
+
+\begin{frame}{Remnants of DNA Damage in Cancer Cells}
+In lung cancer, polycyclic aromatic hydrocarbons (PAH) cause an increase in transversions (G-T and C-A), leading to a decrease in ti/tv.
+
+In melanoma, thymine dimers associated with UV damage lead to increased transitions, leading to an increase in ti/tv.
+\end{frame}
 
 \end{document}
