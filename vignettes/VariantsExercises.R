@@ -14,7 +14,7 @@ codingvar <- locateVariants(vcf, txdb, CodingVariants())
 seqlevels(vcf)=paste0('chr',seqlevels(vcf))
 codingvar <- locateVariants(vcf, txdb, CodingVariants())
 head(codingvar, 3)
-allvar <- locateVariants(rd, txdb, AllVariants())
+allvar <- locateVariants(vcf, txdb, AllVariants())
 head(allvar)
 
 

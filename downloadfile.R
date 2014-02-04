@@ -1,3 +1,4 @@
+download.file('http://seandavi.github.io/BiocBrazil2014/data/SK-MEL-5.vcf.gz',destfile='SK-MEL-5.vcf.gz')
 download.file('http://seandavi.github.io/BiocBrazil2014/data/SK-MEL-5.vcf.gz.tbi',destfile='SK-MEL-5.vcf.gz.tbi')
 download.file('http://seandavi.github.io/BiocBrazil2014/data/1kg.chr22.vcf.gz',destfile='1kg.chr22.vcf.gz')
 download.file('http://seandavi.github.io/BiocBrazil2014/data/1kg.chr22.vcf.gz.tbi',destfile='1kg.chr22.vcf.gz.tbi')
