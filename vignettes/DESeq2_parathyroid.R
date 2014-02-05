@@ -270,97 +270,6 @@ reactomeResultSignif <- reactomeResult[ reactomeResult$padjust < 0.05, ]
 reactomeResultSignif[ order(reactomeResultSignif$strength), ]
 
 
-## ----topDEGene-----------------------------------------------------------
-deGeneID <- "ENSG00000099194"
-res[deGeneID,]
-deGene <- range(rowData(dds[deGeneID,])[[1]])
-names(deGene) <- deGeneID
-deGene
-
-
-## ----defineRange---------------------------------------------------------
-as.character(seqnames(deGene))
-ucscChrom <- paste0("chr",as.character(seqnames(deGene)))
-ucscRanges <- ranges(flank(deGene,width=10e6,both=TRUE))
-subsetRange <- GRanges(ucscChrom, ucscRanges)
-subsetRange
-
-
-## ----downloadERBS, eval=FALSE--------------------------------------------
-## ##
-## ## Please do not run this code if you do not have an internet connection,
-## ## alternatively use the local file import in the next code chunk.
-## ##
-## library( "rtracklayer" )
-## trackName <- "wgEncodeRegTfbsClusteredV2"
-## tableName <- "wgEncodeRegTfbsClusteredV2"
-## trFactor <- "ERalpha_a"
-## mySession <- browserSession()
-## ucscTable <- getTable(ucscTableQuery(mySession, track=trackName,
-##                                      range=subsetRange, table=tableName,
-##                                      name=trFactor))
-
-
-## ----localERBS-----------------------------------------------------------
-ucscTableFile <- system.file('extdata/localUcscTable.csv.gz',package='BiocBrazil2014')
-ucscTable <- read.csv(gzfile(ucscTableFile), stringsAsFactors=FALSE)
-
-
-## ----ERBS2Peaks----------------------------------------------------------
-peaks <- with(ucscTable, GRanges(chrom, IRanges(chromStart, chromEnd), 
-                                 score=score))
-seqlevels(peaks) <- gsub("chr(.+)","\\1",seqlevels(peaks))
-seqlevels(peaks) <- seqlevels(deGene)
-
-
-## ----nearestPeakDo, cache=TRUE, echo=FALSE-------------------------------
-# suppress warning which exists for BioC 2.12 of changes to distance()
-suppressWarnings({d2nearest <- distanceToNearest(deGene, peaks)})
-
-
-## ----nearestPeakShow, eval=FALSE-----------------------------------------
-## d2nearest <- distanceToNearest(deGene, peaks)
-
-
-## ----distanceShow, eval=FALSE--------------------------------------------
-## distance(deGene, peaks)
-
-
-## ----distanceDo, echo=FALSE----------------------------------------------
-suppressWarnings({distance(deGene, peaks)})
-
-
-## ----distanceToNearest---------------------------------------------------
-d2nearest
-
-
-## ----nearestPeakOut------------------------------------------------------
-deGene
-peaks[subjectHits(d2nearest)]
-
-
-## ----plotPeaksAndGene, fig.width=6, fig.height=4, fig.cap="A 2 Mb genomic range showing the location of the differentially expressedgene (labelled 'g'), and the peaks (labelled 'p'). "----
-plotRange <- start(deGene) + 1e6 * c(-1,1)
-peakNearest <- ( seq_along(peaks) == subjectHits(d2nearest) )
-plot(x=start(peaks), y=ifelse(peakNearest,.3,.2),
-     ylim=c(0,1), xlim=plotRange, pch='p',
-     col=ifelse(peakNearest,"red","grey60"),
-     yaxt="n", ylab="",
-     xlab=paste("2 Mb on chromosome",as.character(seqnames(deGene))))
-points(x=start(deGene),y=.8,pch='g')
-
-
-## ----calculateSumForCaption, echo=FALSE----------------------------------
-plotGRange <- GRanges(seqnames(peaks[1]),IRanges(plotRange[1],plotRange[2]))
-numPeaksInPlotRange <- sum(peaks %over% plotGRange)
-
-
-## ----peakDists-----------------------------------------------------------
-  peakDists <- diff(sort(start(peaks)))
-  summary(peakDists)
-  mean(peakDists)
-
-
 ## ----rld, cache=TRUE-----------------------------------------------------
 rld <- rlogTransformation(dds)
 head( assay(rld) )
@@ -392,7 +301,7 @@ colours = colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 heatmap.2( sampleDistMatrix, trace="none", col=colours)
 
 
-## ----samplePCA,fig.cap="The same heatmap as in Figure \\ref{sampleDistHeatmap} but with better colours"----
+## ----samplePCA,fig.cap="The Principal Components Analysis plot shows the sample relationships in a different way than the heatmap.  In this plot, one can quickly notice that the difference between patients is much geater than the difference between treatments."----
 print( plotPCA( rld, intgroup = c( "patient", "treatment") ) )
 
 
